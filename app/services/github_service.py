@@ -2,16 +2,25 @@ import json
 import urllib.request
 from typing import Dict, Any, List
 from fastapi import HTTPException, status
+import datetime
+
+from app.config.config import GITHUB_TOKEN
 
 GITHUB_API_BASE = "https://api.github.com"
 
 def fetch_github_user_repos(username: str) -> List[Dict[str, Any]]:
     """Fetches public repositories for a given GitHub username via GitHub REST API."""
     url = f"{GITHUB_API_BASE}/users/{username}/repos?per_page=100&sort=updated"
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "DevForge-Backend-App"}
-    )
+    
+    headers = {
+        "User-Agent": "DevForge-Backend-App",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+
+    req = urllib.request.Request(url, headers=headers)
     
     try:
         with urllib.request.urlopen(req) as response:
@@ -29,11 +38,30 @@ def fetch_github_user_repos(username: str) -> List[Dict[str, Any]]:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"GitHub user '{username}' not found. Please check the spelling or connect a valid account."
             )
-        elif e.code == 403:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="GitHub API rate limit exceeded. Please try again later."
-            )
+        elif e.code in (403, 429):
+            remaining = e.headers.get("x-ratelimit-remaining")
+            reset_time = e.headers.get("x-ratelimit-reset")
+            
+            is_rate_limit = (remaining == '0' or e.code == 429)
+            
+            if is_rate_limit:
+                msg = "GitHub API rate limit exceeded. Please try again later."
+                if reset_time:
+                    try:
+                        reset_dt = datetime.datetime.fromtimestamp(int(reset_time))
+                        reset_str = reset_dt.strftime("%H:%M")
+                        msg = f"GitHub API rate limit exceeded. Please try again after {reset_str}."
+                    except Exception:
+                        pass
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=msg
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="GitHub API access forbidden."
+                )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"GitHub API Error: {str(e)}"

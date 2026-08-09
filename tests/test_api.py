@@ -189,3 +189,56 @@ def test_update_profile():
     assert data["full_name"] == "New Name"
     assert data["github_username"] == "newgit"
 
+from unittest.mock import patch, MagicMock
+from app.services.github_service import fetch_github_user_repos
+import urllib.error
+import datetime
+
+def test_github_service_authenticated(monkeypatch):
+    monkeypatch.setattr("app.services.github_service.GITHUB_TOKEN", "fake_token")
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.read.return_value = b'[{"name": "repo1", "stargazers_count": 5}]'
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+        
+        repos = fetch_github_user_repos("testuser")
+        assert len(repos) == 1
+        
+        req_obj = mock_urlopen.call_args[0][0]
+        assert req_obj.get_header("Authorization") == "Bearer fake_token"
+        assert req_obj.get_header("Accept") == "application/vnd.github+json"
+
+def test_github_service_unauthenticated(monkeypatch):
+    monkeypatch.setattr("app.services.github_service.GITHUB_TOKEN", None)
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.read.return_value = b'[{"name": "repo1"}]'
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+        
+        fetch_github_user_repos("testuser")
+        req_obj = mock_urlopen.call_args[0][0]
+        assert not req_obj.has_header("Authorization")
+
+def test_github_service_rate_limit(monkeypatch):
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_err = urllib.error.HTTPError(url="", code=403, msg="Forbidden", hdrs={"x-ratelimit-remaining": "0", "x-ratelimit-reset": "1700000000"}, fp=None)
+        mock_urlopen.side_effect = mock_err
+        
+        try:
+            fetch_github_user_repos("testuser")
+        except Exception as e:
+            assert e.status_code == 429
+            assert "after" in e.detail
+
+def test_github_service_not_found():
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_err = urllib.error.HTTPError(url="", code=404, msg="Not Found", hdrs={}, fp=None)
+        mock_urlopen.side_effect = mock_err
+        
+        try:
+            fetch_github_user_repos("invaliduser")
+        except Exception as e:
+            assert e.status_code == 404
+
