@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevForge Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Message here</div>
+
+    <!-- Auth View (Split Screen) -->
+    <div id="auth-view" class="auth-layout" style="display: none;">
+        <div class="auth-left">
+            <div class="auth-brand-container">
+                <div class="brand-logo"></div>
+                <div class="auth-brand">DEVFORGE</div>
+            </div>
+            
+            <h1 class="auth-hero-title">Your developer<br>growth workspace.</h1>
+            <p class="auth-hero-subtitle">Turn the work you build into evidence of the developer you're becoming.</p>
+
+            <div class="growth-map">
+                <!-- Node 1: Projects -->
+                <div class="map-node">
+                    <div class="node-dot"></div>
+                    <div class="node-content">
+                        <div class="node-label">PROJECTS</div>
+                        <div class="node-value">06 projects</div>
+                    </div>
+                </div>
+                
+                <div class="map-connector"></div>
+                
+                <!-- Node 2: GitHub -->
+                <div class="map-node">
+                    <div class="node-dot"></div>
+                    <div class="node-content">
+                        <div class="node-label">GITHUB</div>
+                        <div class="node-value">14 repositories</div>
+                    </div>
+                </div>
+                
+                <div class="map-connector"></div>
+                
+                <!-- Node 3: Evidence -->
+                <div class="map-node">
+                    <div class="node-dot"></div>
+                    <div class="node-content">
+                        <div class="node-label">DEVELOPER EVIDENCE</div>
+                        <div class="node-metrics">
+                            <div class="metric-bar"><span>Python</span><div class="bar-bg"><div class="bar-fill" style="width: 80%"></div></div></div>
+                            <div class="metric-bar"><span>APIs</span><div class="bar-bg"><div class="bar-fill" style="width: 60%"></div></div></div>
+                            <div class="metric-bar"><span>SQL</span><div class="bar-bg"><div class="bar-fill" style="width: 40%"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Split branches -->
+                <div class="map-split-container">
+                    <div class="map-branch-left">
+                        <div class="map-connector branch-line"></div>
+                        <div class="map-node">
+                            <div class="node-dot highlight-success"></div>
+                            <div class="node-content">
+                                <div class="node-label">STRENGTHS</div>
+                                <div class="node-value">Backend, Python</div>
+                            </div>
+                        </div>
+                        <div class="map-connector branch-line bottom"></div>
+                    </div>
+                    <div class="map-branch-right">
+                        <div class="map-connector branch-line"></div>
+                        <div class="map-node">
+                            <div class="node-dot highlight-danger"></div>
+                            <div class="node-content">
+                                <div class="node-label">GAPS</div>
+                                <div class="node-value">Testing, CI/CD</div>
+                            </div>
+                        </div>
+                        <div class="map-connector branch-line bottom"></div>
+                    </div>
+                </div>
+                
+                <!-- Merge Node: Action -->
+                <div class="map-node target-node">
+                    <div class="node-dot pulse"></div>
+                    <div class="node-content">
+                        <div class="node-label">NEXT ACTION</div>
+                        <div class="node-value">Add automated tests</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="auth-bottom-nav">
+                <span>BUILD</span> <span class="dim">•</span>
+                <span>MEASURE</span> <span class="dim">•</span>
+                <span>IMPROVE</span> <span class="dim">•</span>
+                <span>PREPARE</span>
+            </div>
+        </div>
+        
+        <div class="auth-right">
+            <!-- Login Form -->
+            <div id="login-container" class="auth-form-container">
+                <h2>Sign In</h2>
+                <p class="auth-subtitle">Welcome back to DevForge.</p>
+                <div id="login-error" class="error-message"></div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="login-email" class="form-control" required placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" class="form-control" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+                <div class="auth-switch">
+                    Don't have an account? <a onclick="toggleAuth('register')">Register</a>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-container" class="auth-form-container" style="display: none;">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Join the developer workspace.</p>
+                <div id="reg-error" class="error-message"></div>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="reg-name" class="form-control" required placeholder="Jane Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reg-email" class="form-control" required placeholder="name@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" class="form-control" required minlength="6" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Username (Optional)</label>
+                        <input type="text" id="reg-github" class="form-control" placeholder="janedoe">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+                <div class="auth-switch">
+                    Already have an account? <a onclick="toggleAuth('login')">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Shell (Dashboard Layout) -->
+    <!-- App Shell (Dashboard Layout) -->
+    <div id="app-layout" class="app-layout" style="display: none;">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand-container">
+                <div class="brand-logo-small"></div>
+                <div class="sidebar-brand">DEVFORGE</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-label">WORKSPACE</div>
+                <a class="nav-link" onclick="navigateTo('dashboard')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Overview
+                </a>
+                <a class="nav-link" onclick="navigateTo('projects')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Projects
+                </a>
+                <a class="nav-link" onclick="navigateTo('github')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    GitHub
+                </a>
+                <a class="nav-link" onclick="navigateTo('ai')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    AI Insights
+                </a>
+            </div>
+
+            <!-- Future features visually hidden to prevent broken feel -->
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-user" id="sidebar-user">
+                    <div class="user-avatar" id="user-avatar">U</div>
+                    <div class="user-info">
+                        <div class="user-name" id="user-name">User Name</div>
+                        <div class="user-role">Student Developer</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; display: flex; flex-direction: column;">
+                    <a class="nav-link" onclick="navigateTo('profile')">Profile</a>
+                    <a class="nav-link nav-logout" onclick="handleLogout()">Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-title" id="topbar-title">Overview</div>
+            </header>
+
+            <div class="content-scroll-area">
+                
+                <!-- Dashboard / Overview -->
+                <section id="dashboard-view" class="view-section">
+                    <header class="view-header">
+                        <h1 id="greeting-title" class="view-title">Good evening, Developer</h1>
+                        <p class="view-subtitle">Here's what your developer profile currently demonstrates.</p>
+                    </header>
+                    
+                    <!-- Primary Insight Area -->
+                    <h3 class="section-label">DEVELOPER SNAPSHOT</h3>
+                    <div class="snapshot-grid" id="dashboard-snapshot">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="split-layout" style="margin-top: 3rem;">
+                        <div class="split-left">
+                            <h3 class="section-label">RECENT PROJECTS</h3>
+                            <div class="list-container" id="dashboard-recent-projects">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                        <div class="split-right">
+                            <h3 class="section-label">NEXT BEST ACTION</h3>
+                            <div class="content-panel highlight-panel" id="dashboard-next-action">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Projects View -->
+                <section id="projects-view" class="view-section">
+                    <header class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h1 class="view-title">Projects</h1>
+                            <p class="view-subtitle">Everything you've built, in one place.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openProjectModal()">+ New Project</button>
+                    </header>
+
+                    <div id="projects-list-container" class="list-container dense-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+
+                <!-- GitHub View -->
+                <section id="github-view" class="view-section">
+                    <header class="view-header">
+                        <h1 class="view-title">GitHub</h1>
+                        <p class="view-subtitle" id="github-subtitle">@username</p>
+                    </header>
+                    <div id="github-content"></div>
+                </section>
+
+                <!-- AI Insights View -->
+                <section id="ai-view" class="view-section">
+                    <header class="view-header">
+                        <h1 class="view-title">AI Portfolio Insights</h1>
+                        <p class="view-subtitle">Understand what your current work demonstrates.</p>
+                    </header>
+                    <div id="ai-content"></div>
+                </section>
+
+                <!-- Profile View -->
+                <section id="profile-view" class="view-section">
+                    <header class="view-header">
+                        <h1 class="view-title">Profile</h1>
+                        <p class="view-subtitle">Your account details.</p>
+                    </header>
+                    <div id="profile-content"></div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Project</h3>
+                <button class="close-btn" onclick="closeProjectModal()">×</button>
+            </div>
+            
+            <div id="proj-error" class="error-message"></div>
+            
+            <form id="project-form">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="proj-title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="proj-desc" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tech Stack (comma separated) *</label>
+                    <input type="text" id="proj-tech" class="form-control" required placeholder="e.g. Python, FastAPI, PostgreSQL">
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>GitHub URL</label>
+                        <input type="url" id="proj-github" class="form-control" placeholder="https://github.com/...">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Live URL</label>
+                        <input type="url" id="proj-live" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="proj-status" class="form-control">
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
