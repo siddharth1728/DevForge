@@ -221,80 +221,83 @@ async function renderDashboard() {
             signalsHtml += '</div>';
         }
 
-        let gapsHtml = '';
         let readinessScore = 'N/A';
-        let readinessLabel = 'Not analyzed';
-        let readinessSub = 'Run analysis to compute';
-        
         if (cachedAiInsights) {
             readinessScore = cachedAiInsights.portfolio_score;
-            readinessLabel = cachedAiInsights.portfolio_score >= 80 ? 'Strong foundation' : 'Developing';
-            readinessSub = 'Based on AI analysis';
-            
-            gapsHtml = '<div class="skill-list">';
-            (cachedAiInsights.missing_skills || []).slice(0, 3).forEach(gap => {
-                gapsHtml += `<div class="gap-item">${gap}</div>`;
-            });
-            gapsHtml += '</div>';
-            
+        }
+
+        const metricsHtml = `
+            <div class="metrics-row" style="margin-bottom: 2rem;">
+                <div class="metric-item">
+                    <div class="metric-label">Portfolio Projects</div>
+                    <div class="metric-value">${stats.total_projects}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">GitHub Repositories</div>
+                    <div class="metric-value">${stats.github_repos}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">GitHub Stars</div>
+                    <div class="metric-value">${stats.github_stars}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Primary Language</div>
+                    <div class="metric-value highlight">${(stats.top_languages && stats.top_languages.length > 0) ? stats.top_languages[0] : 'N/A'}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Portfolio Readiness</div>
+                    <div class="metric-value" style="color: ${readinessScore !== 'N/A' ? 'var(--text-primary)' : 'var(--text-secondary)'}">${readinessScore}</div>
+                </div>
+            </div>
+        `;
+        
+        if (cachedAiInsights) {
             const actionRec = (cachedAiInsights.recommendations && cachedAiInsights.recommendations.length > 0) 
                 ? cachedAiInsights.recommendations[0] 
                 : 'Keep building your projects.';
                 
             nextActionContainer.innerHTML = `
-                <h4>${actionRec}</h4>
-                <p>Based on your latest portfolio analysis.</p>
-                <button class="btn btn-secondary mt-1" onclick="navigateTo('ai')">View Details →</button>
+                <h4 style="color: var(--accent-primary); line-height: 1.4; margin-bottom: 1rem;">${actionRec}</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Based on your actual portfolio analysis.</p>
+                <button class="btn btn-secondary" onclick="navigateTo('ai')">View Full Analysis →</button>
             `;
         } else {
-            gapsHtml = '<p class="text-secondary" style="font-size: 0.85rem;">Not analyzed</p>';
             nextActionContainer.innerHTML = `
-                <div class="empty-state" style="padding: 1.5rem; text-align: left; border: none; background: transparent;">
-                    <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">AI Portfolio Analysis</h4>
-                    <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.85rem;">Run an analysis to identify skill gaps and compute readiness.</p>
-                    <button class="btn btn-secondary" onclick="navigateTo('ai')">Run Analysis</button>
+                <div style="text-align: left;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">Run AI Portfolio Analysis</h4>
+                    <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.85rem;">Discover what your projects demonstrate and identify skill gaps.</p>
+                    <button class="btn btn-primary" onclick="navigateTo('ai')">Run Analysis</button>
                 </div>
             `;
         }
 
-        snapshotContainer.innerHTML = `
-            <div class="snapshot-card">
-                <div class="snapshot-card-title">PORTFOLIO READINESS</div>
-                <div class="score-display">
-                    <div class="score-value">${readinessScore}</div>
-                    ${readinessScore !== 'N/A' ? '<div class="score-max">/ 100</div>' : ''}
-                </div>
-                <div class="score-label" style="color: ${readinessScore !== 'N/A' ? 'var(--text-primary)' : 'var(--text-secondary)'}">${readinessLabel}</div>
-                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">${readinessSub}</p>
-            </div>
-            <div class="snapshot-card">
-                <div class="snapshot-card-title">YOUR STRONGEST SIGNALS</div>
-                ${signalsHtml}
-            </div>
-            <div class="snapshot-card">
-                <div class="snapshot-card-title">EVIDENCE GAPS</div>
-                ${gapsHtml}
-            </div>
-        `;
+        snapshotContainer.innerHTML = metricsHtml;
 
         // Fetch recent projects
         const projects = await apiFetch('/projects/');
         const recent = projects.slice(0, 3);
         
         if (recent.length === 0) {
-            recentProjectsContainer.innerHTML = `<div class="list-row"><p class="text-secondary" style="font-size:0.85rem;">No projects added yet.</p></div>`;
+            recentProjectsContainer.innerHTML = `
+                <div class="empty-state" style="padding: 2rem; border: none; background: transparent;">
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">No projects yet.</p>
+                    <button class="btn btn-secondary" onclick="navigateTo('projects')">Create your first project to start building your portfolio.</button>
+                </div>
+            `;
         } else {
             recentProjectsContainer.innerHTML = `
                 ${recent.map(p => `
                     <div class="list-row" style="padding: 1rem;">
                         <div class="list-col-main">
-                            <h4 style="font-size: 0.95rem;">${p.title}</h4>
-                            <div style="margin-top: 0.25rem;">
+                            <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">${p.title}</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${p.description || 'No description provided.'}</p>
+                            <div>
                                 <span style="font-size: 0.75rem; color: var(--text-secondary);">${p.tech_stack}</span>
                             </div>
                         </div>
-                        <div class="list-col-actions">
+                        <div class="list-col-actions" style="flex-direction: column; align-items: flex-end; gap: 0.5rem;">
                             <span class="status-badge ${p.status}">${p.status === 'completed' ? 'Completed' : 'Active'}</span>
+                            ${p.github_url ? `<a href="${p.github_url}" target="_blank" class="action-link" style="font-size: 0.8rem;">GitHub</a>` : ''}
                         </div>
                     </div>
                 `).join('')}
@@ -320,22 +323,24 @@ async function renderProjects() {
         }
 
         container.innerHTML = projects.map(p => `
-            <div class="list-row">
-                <div class="list-col-main">
-                    <h4>${p.title}</h4>
-                    <p>${p.description || 'No description provided.'}</p>
-                    <div style="margin-top: 0.75rem;">
-                        ${p.tech_stack.split(',').map(t => `<span class="tech-tag">${t.trim()}</span>`).join('')}
+            <div class="content-panel" style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <h3 style="margin-bottom: 0.5rem; text-transform: uppercase; font-size: 1.1rem; letter-spacing: 0.05em; color: var(--text-title);">${p.title}</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1rem;">${p.description || '<span style="font-style: italic;">Add a description to explain what this project demonstrates.</span>'}</p>
+                        <div style="margin-bottom: 1rem;">
+                            ${p.tech_stack.split(',').map(t => `<span class="tech-tag">${t.trim()}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <span class="status-badge ${p.status}">${p.status === 'completed' ? 'Completed' : 'In Progress'}</span>
                     </div>
                 </div>
-                <div class="list-col-actions" style="flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 1rem;">
-                    <span class="status-badge ${p.status}">${p.status === 'completed' ? 'Completed' : 'In Progress'}</span>
-                    <div>
-                        ${p.github_url ? `<a href="${p.github_url}" target="_blank" class="action-link">GitHub</a>` : ''}
-                        ${p.live_url ? `<a href="${p.live_url}" target="_blank" class="action-link">Live</a>` : ''}
-                        <a class="action-link" style="cursor:pointer;" onclick='openProjectModal(${JSON.stringify(p)})'>Edit</a>
-                        <a class="action-link" style="cursor:pointer; color: var(--danger-text);" onclick="deleteProject(${p.id})">Delete</a>
-                    </div>
+                <div style="display: flex; gap: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 0.5rem;">
+                    ${p.github_url ? `<a href="${p.github_url}" target="_blank" class="action-link">GitHub</a>` : ''}
+                    ${p.live_url ? `<a href="${p.live_url}" target="_blank" class="action-link">Live</a>` : ''}
+                    <a class="action-link" style="cursor:pointer;" onclick='openProjectModal(${JSON.stringify(p)})'>Edit</a>
+                    <a class="action-link" style="cursor:pointer; color: var(--danger-text);" onclick="deleteProject(${p.id})">Delete</a>
                 </div>
             </div>
         `).join('');
@@ -536,50 +541,52 @@ async function runAIAnalysis() {
 
 function showAIResults(insights) {
     const container = document.getElementById('ai-content');
-    const renderList = (arr, isGap = false) => arr.map(i => `<div class="gap-item" style="${isGap ? 'color: var(--text-secondary);' : ''}">${i}</div>`).join('');
     
     container.innerHTML = `
-        <div class="snapshot-card" style="align-items: center; text-align: center; max-width: 400px; margin: 0 auto 3rem;">
-            <div class="snapshot-card-title">PORTFOLIO READINESS</div>
-            <div class="score-display">
-                <div class="score-value">${insights.portfolio_score}</div>
-                <div class="score-max">/ 100</div>
+        <div style="margin-bottom: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem;">
+            <h3 class="section-label">PORTFOLIO READINESS</h3>
+            <div style="display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.5rem;">
+                <span style="font-size: 3rem; font-weight: 700; color: var(--text-primary);">${insights.portfolio_score}</span>
+                <span style="font-size: 1.5rem; color: var(--text-secondary);">/ 100</span>
             </div>
-            <div class="score-label" style="font-size: 1.1rem; margin-top: 0.5rem;">${insights.portfolio_score >= 80 ? 'Strong foundation' : 'Developing'}</div>
+            <div style="font-size: 1.2rem; color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 1.5rem;">
+                ${insights.portfolio_score >= 80 ? 'Strong foundation' : 'Developing'}
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 600px; line-height: 1.5;">
+                AI-generated assessment based on your current DevForge project descriptions, tech stacks, and linked GitHub evidence (stars, repositories, and language distributions).
+            </p>
         </div>
         
-        <div class="split-layout" style="margin-bottom: 3rem;">
-            <div class="split-left">
-                <h3 class="section-label" style="color: var(--text-title);">YOUR STRENGTHS</h3>
-                <div class="skill-list" style="margin-top: 1rem;">
-                    ${renderList(insights.strengths)}
-                </div>
-            </div>
-            <div class="split-right">
-                <h3 class="section-label">EVIDENCE GAPS</h3>
-                <div class="skill-list" style="margin-top: 1rem;">
-                    ${renderList(insights.missing_skills, true)}
-                </div>
+        <div style="margin-bottom: 3rem;">
+            <h3 class="section-label">WHAT YOU'RE DOING WELL</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                ${insights.strengths.map(s => `<div style="display: flex; gap: 0.75rem; align-items: flex-start;"><span style="color: #4ade80;">✓</span><span style="color: var(--text-primary); line-height: 1.4;">${s}</span></div>`).join('')}
             </div>
         </div>
         
-        <div class="split-layout">
-            <div class="split-left">
-                <h3 class="section-label">RECOMMENDATIONS</h3>
-                <div class="skill-list" style="margin-top: 1rem;">
-                    ${insights.recommendations.map((r, i) => `<div style="margin-bottom: 1rem; color: var(--text-secondary);"><strong style="color: var(--text-primary);">${i+1}.</strong> ${r}</div>`).join('')}
-                </div>
-            </div>
-            <div class="split-right">
-                <h3 class="section-label">NEXT BEST ACTION</h3>
-                <div class="content-panel highlight-panel">
-                    <h4 style="font-size: 1.05rem; line-height: 1.4; margin-bottom: 0.5rem; color: var(--accent-primary);">${insights.recommendations[0] || 'No recommendations available.'}</h4>
-                </div>
+        <div style="margin-bottom: 3rem;">
+            <h3 class="section-label">EVIDENCE GAPS</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                ${insights.missing_skills.map(g => `<div style="display: flex; gap: 0.75rem; align-items: flex-start;"><span style="color: #fb923c;">!</span><span style="color: var(--text-secondary); line-height: 1.4;">${g}</span></div>`).join('')}
             </div>
         </div>
         
-        <div style="margin-top: 4rem; text-align: center;">
-            <button class="btn btn-secondary" onclick="cachedAiInsights = null; runAIAnalysis()">Re-run Analysis</button>
+        <div style="margin-bottom: 3rem;">
+            <h3 class="section-label">YOUR NEXT MOVES</h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                ${insights.recommendations.map((r, i) => `<div style="display: flex; gap: 1rem; align-items: flex-start;"><span style="color: var(--text-secondary); font-weight: 600; font-family: monospace;">0${i+1}</span><span style="color: var(--text-primary); line-height: 1.4;">${r}</span></div>`).join('')}
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 3rem;">
+            <h3 class="section-label">NEXT BEST ACTION</h3>
+            <div class="content-panel highlight-panel" style="margin-top: 1rem; padding: 2rem;">
+                <h4 style="font-size: 1.1rem; line-height: 1.5; color: var(--accent-primary);">${insights.recommendations[0] || 'No recommendations available.'}</h4>
+            </div>
+        </div>
+        
+        <div style="margin-top: 4rem;">
+            <button class="btn btn-secondary" onclick="cachedAiInsights = null; runAIAnalysis()">Run Again</button>
         </div>
     `;
 }
