@@ -274,7 +274,7 @@ Required Render Environment Variables:
 ![Dashboard Screenshot](image.png)
 
 ### Projects
-`<!-- Add Projects screenshot here -->`
+![Projects Screenshot](projects.png)
 
 ### GitHub Analytics
 ![GitHub Analytics Screenshot](github-analytics.png)
