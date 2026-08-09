@@ -277,7 +277,7 @@ Required Render Environment Variables:
 `<!-- Add Projects screenshot here -->`
 
 ### GitHub Analytics
-`<!-- Add GitHub Analytics screenshot here -->`
+![GitHub Analytics Screenshot](github-analytics.png)
 
 ### AI Portfolio Insights
 `<!-- Add AI Insights screenshot here -->`
