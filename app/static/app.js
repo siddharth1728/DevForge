@@ -247,11 +247,13 @@ async function renderDashboard() {
                 <button class="btn btn-secondary mt-1" onclick="navigateTo('ai')">View Details →</button>
             `;
         } else {
-            gapsHtml = '<p class="text-secondary" style="font-size: 0.85rem;">Portfolio not analyzed yet.</p>';
+            gapsHtml = '<p class="text-secondary" style="font-size: 0.85rem;">Not analyzed</p>';
             nextActionContainer.innerHTML = `
-                <h4>Analyze Portfolio</h4>
-                <p>Get AI-driven insights on your current projects and GitHub activity to identify skill gaps and compute readiness.</p>
-                <button class="btn btn-secondary mt-1" onclick="navigateTo('ai')">Run Analysis →</button>
+                <div class="empty-state" style="padding: 1.5rem; text-align: left; border: none; background: transparent;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">AI Portfolio Analysis</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.85rem;">Run an analysis to identify skill gaps and compute readiness.</p>
+                    <button class="btn btn-secondary" onclick="navigateTo('ai')">Run Analysis</button>
+                </div>
             `;
         }
 
@@ -508,41 +510,18 @@ function renderAIView() {
 async function runAIAnalysis() {
     const container = document.getElementById('ai-content');
     
-    // 2D sequence UI
     container.innerHTML = `
-        <div class="ai-sequence">
-            <div class="sequence-step active" id="step-1"><div class="step-icon"><div class="spinner"></div></div> <span>Analyzing Projects</span></div>
-            <div class="sequence-step" id="step-2"><div class="step-icon">○</div> <span>Processing GitHub Activity</span></div>
-            <div class="sequence-step" id="step-3"><div class="step-icon">○</div> <span>Extracting Technical Evidence</span></div>
-            <div class="sequence-step" id="step-4"><div class="step-icon">○</div> <span>Generating Insights</span></div>
+        <div class="empty-state" style="border: none; background: transparent;">
+            <div class="loader" style="margin: 0 auto 1.5rem auto;"></div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Analyzing Portfolio...</h3>
+            <p style="color: var(--text-secondary);">Reviewing projects, GitHub activity, and generating actionable insights.</p>
         </div>
     `;
-    
-    // Fake sequence timing for UX
-    const setStep = (id, text, isDone) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (isDone) {
-            el.className = 'sequence-step completed';
-            el.querySelector('.step-icon').innerHTML = '✓';
-        } else {
-            el.className = 'sequence-step active';
-            el.querySelector('.step-icon').innerHTML = '<div class="spinner"></div>';
-        }
-    };
-
-    setTimeout(() => { setStep('step-1', null, true); setStep('step-2', null, false); }, 1200);
-    setTimeout(() => { setStep('step-2', null, true); setStep('step-3', null, false); }, 2400);
-    setTimeout(() => { setStep('step-3', null, true); setStep('step-4', null, false); }, 3800);
     
     try {
         const insights = await apiFetch('/ai/resume-insights');
         cachedAiInsights = insights; // store for dashboard
-        
-        // Let the last animation finish visually before snapping to results
-        setTimeout(() => {
-            showAIResults(insights);
-        }, 5000);
+        showAIResults(insights);
         
     } catch (error) {
         container.innerHTML = `
@@ -594,8 +573,7 @@ function showAIResults(insights) {
             <div class="split-right">
                 <h3 class="section-label">NEXT BEST ACTION</h3>
                 <div class="content-panel highlight-panel">
-                    <h4 style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 1rem;">${insights.recommendations[0] || 'Continue building.'}</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem;">Why? Addressing this gap provides the highest impact to your portfolio readiness based on your current demonstrated skills.</p>
+                    <h4 style="font-size: 1.05rem; line-height: 1.4; margin-bottom: 0.5rem; color: var(--accent-primary);">${insights.recommendations[0] || 'No recommendations available.'}</h4>
                 </div>
             </div>
         </div>
