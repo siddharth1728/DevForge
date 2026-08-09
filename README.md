@@ -4,8 +4,8 @@ Developer Portfolio Intelligence Platform
 DevForge is a full-stack developer portfolio workspace designed to help engineering students and early-career developers understand and improve their technical portfolio. By combining personal project management with real GitHub activity analytics and AI-powered insights, DevForge provides actionable evidence of your technical strengths and identifies skill gaps before your next interview.
 
 ## 🌐 Live Demo
-- **Live Application**: `<!-- Add Live Render URL here -->`
-- **GitHub Repository**: `<!-- Add GitHub URL here -->`
+- **Live Application**: `https://devforge-w3kd.onrender.com/`
+- **GitHub Repository**: `https://github.com/siddharth1728/DevForge`
 
 ---
 
