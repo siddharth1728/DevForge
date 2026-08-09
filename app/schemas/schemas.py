@@ -23,6 +23,10 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    github_username: Optional[str] = None
+
 # --- TOKEN SCHEMAS ---
 class Token(BaseModel):
     access_token: str

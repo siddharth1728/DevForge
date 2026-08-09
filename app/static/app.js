@@ -614,35 +614,68 @@ async function renderProfile() {
     try {
         const user = await apiFetch('/auth/me');
         container.innerHTML = `
-            <div class="list-container dense-list" style="max-width: 600px;">
+            <form id="profile-form" class="list-container dense-list" style="max-width: 600px;" onsubmit="handleProfileUpdate(event)">
+                <div id="profile-error" class="error-message"></div>
                 <div class="list-row">
-                    <div class="list-col-main">
-                        <label>Name</label>
-                        <h4 style="font-size: 1.1rem;">${user.full_name}</h4>
+                    <div class="list-col-main" style="width: 100%;">
+                        <label for="profile-name">Name</label>
+                        <input type="text" id="profile-name" class="input-field" value="${user.full_name}" required style="width: 100%; margin-top: 0.5rem;">
                     </div>
                 </div>
                 <div class="list-row">
-                    <div class="list-col-main">
-                        <label>Email Address</label>
-                        <h4 style="font-size: 1.1rem;">${user.email}</h4>
+                    <div class="list-col-main" style="width: 100%;">
+                        <label>Email Address (Cannot be changed)</label>
+                        <input type="email" class="input-field" value="${user.email}" disabled style="width: 100%; margin-top: 0.5rem; opacity: 0.7; cursor: not-allowed;">
                     </div>
                 </div>
                 <div class="list-row">
-                    <div class="list-col-main">
-                        <label>GitHub Username</label>
-                        <h4 style="font-size: 1.1rem;">${user.github_username || 'Not Connected'}</h4>
+                    <div class="list-col-main" style="width: 100%;">
+                        <label for="profile-github">GitHub Username</label>
+                        <input type="text" id="profile-github" class="input-field" value="${user.github_username || ''}" style="width: 100%; margin-top: 0.5rem;">
                     </div>
                 </div>
                 <div class="list-row">
                     <div class="list-col-main">
                         <label>Member Since</label>
-                        <h4 style="font-size: 1.1rem;">${new Date(user.created_at).toLocaleDateString()}</h4>
+                        <p style="margin-top: 0.5rem;">${new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
-            </div>
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary" id="profile-save-btn">Save Changes</button>
+                </div>
+            </form>
         `;
     } catch (error) {
         container.innerHTML = createEmptyState("Error", error.message);
+    }
+}
+
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    const btn = document.getElementById('profile-save-btn');
+    const errEl = document.getElementById('profile-error');
+    errEl.style.display = 'none';
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    const payload = {
+        full_name: document.getElementById('profile-name').value,
+        github_username: document.getElementById('profile-github').value || null
+    };
+
+    try {
+        const updatedUser = await apiFetch('/auth/me', { method: 'PUT', body: JSON.stringify(payload) });
+        currentUser = updatedUser;
+        document.getElementById('user-avatar').textContent = updatedUser.full_name.charAt(0).toUpperCase();
+        document.getElementById('user-name').textContent = updatedUser.full_name;
+        document.getElementById('github-subtitle').textContent = updatedUser.github_username ? `@${updatedUser.github_username}` : 'Not connected';
+        showToast("Profile updated successfully");
+    } catch (error) {
+        errEl.textContent = error.message;
+        errEl.style.display = 'block';
+    } finally {
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
     }
 }
 

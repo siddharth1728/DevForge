@@ -170,3 +170,22 @@ def test_project_ownership_isolation():
     # User 2 tries to delete User 1's project
     del_response = client.delete(f"/api/projects/{project_id}", headers={"Authorization": f"Bearer {t2}"})
     assert del_response.status_code == 404
+
+def test_update_profile():
+    client.post(
+        "/api/auth/register",
+        json={"email": "update@test.com", "password": "password", "full_name": "Old Name", "github_username": "oldgit"}
+    )
+    login_response = client.post("/api/auth/login", json={"email": "update@test.com", "password": "password"})
+    token = login_response.json()["access_token"]
+    
+    response = client.put(
+        "/api/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"full_name": "New Name", "github_username": "newgit"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["full_name"] == "New Name"
+    assert data["github_username"] == "newgit"
+
