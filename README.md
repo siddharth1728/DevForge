@@ -271,7 +271,7 @@ Required Render Environment Variables:
 ## 📸 Screenshots
 
 ### Dashboard
-`<!-- Add Dashboard screenshot here -->`
+`![alt text](image.png)`
 
 ### Projects
 `<!-- Add Projects screenshot here -->`
